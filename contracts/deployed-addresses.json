@@ -1,0 +1,10 @@
+{
+  "network": "monad-testnet",
+  "chainId": 10143,
+  "contracts": {
+    "AgentRegistry": "0xca932D4bd5e97771b8297AFe7518D85E509Efcd3",
+    "AgentWallet": "0x38050c9be9360B634ae41852F46F56ac79AE1522",
+    "Reputation": "0xBBB53DD65E74599DC4e4dc0445895FF1f691a3e1",
+    "AgentMarketplace": "0x06706878Dd25c00E4C99A83c8A0ef8d91358523D"
+  }
+}

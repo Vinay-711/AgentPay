@@ -1,11 +1,126 @@
-<div align="center">
+# AgentPay
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+**Give AI Agents an Economy.**
 
-  <h1>Built with AI Studio</h2>
+Built at Monad Blitz Bangalore V5 (August 16, 2026).
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+AgentPay is an economic infrastructure layer for autonomous AI agents on
+Monad. Agents get an on-chain identity, a policy-constrained wallet, and the
+ability to discover, hire, and pay other agents autonomously — settled on
+Monad, guarded by **AgentGuard**.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+```
+Human → AI Agent → AI Agent → AI Agent → Monad → Settlement
+```
 
-</div>
+instead of the usual:
+
+```
+Human → AI → Human approval → Payment
+```
+
+> See [`PRD.md`](./PRD.md) for full product scope, architecture, and demo script.
+
+---
+
+## Why
+
+AI agents can reason and plan, but every economic action still needs a human
+in the loop. AgentPay removes that bottleneck for agent-to-agent commerce:
+agents can hire specialist agents and pay them, autonomously, within hard
+spending limits that a human sets once — not per transaction.
+
+## What's in this repo (hackathon MVP scope)
+
+- **Smart contracts (Monad testnet)**
+  - `AgentRegistry.sol` — on-chain agent identity
+  - `AgentWallet.sol` — constrained wallet: deposits, payments, per-tx / daily limits, withdrawals
+  - `AgentMarketplace.sol` — agent registration, service listings, hiring, payment routing
+  - `Reputation.sol` — job history → reputation score
+- **AgentGuard** — a rule-based policy engine that sits between the LLM and
+  the wallet. The LLM never holds a private key; it can only *request* a
+  payment, which AgentGuard evaluates against spending limits, allowlists,
+  and an approval threshold before it's allowed to reach the wallet.
+- **Backend** — FastAPI (or Node.js) agent orchestrator: LLM + tool calling
+  (`search_agents`, `get_agent_profile`, `hire_agent`, `send_payment`,
+  `check_wallet`, `request_human_approval`, `record_result`)
+- **Frontend** — React dashboard: balance/spend/reputation overview, natural
+  language command box, agent marketplace, agent passport, wallet view,
+  AgentGuard approval/block modal, live transaction activity feed
+- **Database** — Supabase/Postgres (`agents`, `services`, `jobs`, `transactions`)
+
+## Architecture
+
+```
+User
+  ↓
+AI Agent (LLM orchestrator)
+  ↓
+AgentGuard Policy Engine   ← LLM can only REQUEST a payment
+  ↓
+Smart Wallet (AgentWallet.sol)
+  ↓
+Monad
+```
+
+## Demo
+
+1. Connect wallet, deposit testnet funds
+2. Create a TravelAgent with a $10 daily spending limit
+3. Ask it to "Plan a 3-day Dubai trip under $500"
+4. Watch it discover, hire, and pay specialist agents (FlightFinder,
+   HotelFinder, ActivityFinder) on Monad — with AgentGuard checking every
+   transaction and real tx hashes shown live
+5. Get the final itinerary, with reputation and transaction history updated
+   on-chain
+
+## Tech Stack
+
+| Layer | Choice |
+|---|---|
+| Blockchain | Monad Testnet |
+| Contracts | Solidity |
+| Backend | FastAPI / Node.js |
+| AI orchestration | LLM with tool/function calling |
+| Frontend | React |
+| Database | Supabase (Postgres) |
+| Cache | Redis (agent reputation, avoids re-querying chain per request) |
+
+## Getting Started
+
+### 1. Prerequisites
+- Python 3.11+
+- Node.js v18+ & npm
+- Foundry (`forge`)
+- Monad Testnet Wallet with testnet funds
+
+### 2. Deployment & Startup Sequence
+
+```bash
+# 1. Deploy Smart Contracts to Monad Testnet
+cd contracts
+./deploy-monad.sh
+cd ..
+
+# 2. Start Backend Server
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+PYTHONPATH=.. uvicorn backend.main:app --host 0.0.0.0 --port 8000
+
+# 3. Start Frontend UI (in another terminal)
+cd frontend
+npm install
+npm run dev
+
+# 4. Seed Demo Agents & Marketplace (in another terminal)
+source backend/venv/bin/activate
+PYTHONPATH=. python backend/seed.py
+
+# 5. Run Live End-to-End Demo
+PYTHONPATH=. python scripts/run_clean_demo_flow.py
+```
+
+## License
+
+MIT
