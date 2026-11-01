@@ -74,20 +74,21 @@ class AgentGuard:
 
         # ── Check 2: Recipient trusted ────────────────────────────────────────
         recipient_trusted = False
-        rep_score = 50
+        rep_score = 0
         try:
             if service_id:
                 svc = self.chain.get_service(service_id)
                 target_agent_id = svc.get("agent_id")
                 if target_agent_id:
                     rep = self.chain.get_reputation(target_agent_id)
-                    rep_score = rep.get("score", 50)
-                svc_name = svc.get("name", "").lower()
-                if any(known in svc_name for known in KNOWN_TRUSTED_SERVICES):
-                    rep_score = max(rep_score, 80)
+                    rep_score = rep.get("score", 0)
             else:
                 if recipient.lower() in [s.lower() for s in KNOWN_TRUSTED_SERVICES]:
                     rep_score = 100
+
+            if (isinstance(rep_score, bool) or not isinstance(rep_score, (int, float))
+                    or not math.isfinite(rep_score) or not 0 <= rep_score <= 100):
+                raise ValueError("Invalid recipient reputation")
 
             if rep_score >= 40:
                 recipient_trusted = True
