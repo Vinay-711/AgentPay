@@ -1,66 +1,21 @@
-## Foundry
+# AgentPay Contracts
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Solidity contracts for the AgentPay testnet prototype, built with Foundry. The source is under [src](src); active deployment scripts are under [script](script). Legacy tests are kept under [old_tests](old_tests) and may require updating to match the active contract.
 
-Foundry consists of:
+## Local checks
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+From this directory, with Foundry installed:
 
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```sh
+forge build
+forge test
+forge fmt --check
 ```
 
-### Test
+`forge test` only exercises tests discovered by the configured Foundry paths; a zero-test result is not coverage. Read [foundry.toml](foundry.toml) for compiler/remapping configuration and the [project README](../README.md) for the relationship between registry, wallets, marketplace and reputation. Generic Foundry Counter deployment commands do not deploy AgentPay.
 
-```shell
-$ forge test
-```
+## Deployment boundary
 
-### Format
+[deploy-monad.sh](deploy-monad.sh) is an explicit testnet deployment helper. Inspect the script, network and required environment values before invoking it. Deployment broadcasts transactions and is separate from the local build/test commands above. Do not paste private keys into README commands or commit wallet credentials. Existing addresses in [deployed-addresses.json](deployed-addresses.json) must be verified against the intended network before use.
 
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+This is not an audited mainnet payment system. A passing contract test suite does not prove economic safety or successful backend settlement.

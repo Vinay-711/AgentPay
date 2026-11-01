@@ -143,3 +143,14 @@ fallback paths need further review before handling real funds. Use testnet funds
 ## License
 
 MIT
+
+## Component guides
+
+| Component | Start here |
+| --- | --- |
+| Dashboard | [Frontend development](frontend/README.md) |
+| Solidity contracts | [Contract build and test](contracts/README.md) |
+| End-to-end design and setup | [Documentation](docs/README.md) |
+| Payment-policy regression coverage | [Policy safety tests](backend/tests/test_policy_safety.py) |
+
+Treat ML latency claims in design material as evaluation targets unless accompanied by a reproducible benchmark. Live provider calls, testnet transactions and model training are separate from local deterministic policy checks.

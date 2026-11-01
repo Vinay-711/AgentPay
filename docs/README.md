@@ -11,13 +11,13 @@
 | :--- | :--- | :--- |
 | **Smart Contracts** | Solidity ^0.8.24, Foundry, Monad Testnet | On-chain identity (`AgentRegistry`), policy-constrained wallets (`AgentWallet`), service catalog (`AgentMarketplace`), and reputation tracking (`Reputation`). |
 | **Backend Orchestrator** | Python 3.11, FastAPI, Web3.py, LiteLLM/Claude | Autonomous LLM agent orchestrator with live WebSocket event streaming. |
-| **Security Layer** | **AgentGuard** Policy Engine | Deterministic 5-rule safety engine + sub-millisecond ML risk scoring (<5ms latency) that intercepts all LLM payment requests. |
+| **Security Layer** | **AgentGuard** Policy Engine | Deterministic 5-rule safety engine + experimental ML risk scoring (latency requires benchmarking) that intercepts all LLM payment requests. |
 | **ML Risk Pipeline** | XGBoost, Isolation Forest, TF-IDF + LogisticRegression | Tabular risk classifier, spending sequence anomaly detector, and prompt injection defense. |
 | **Frontend Application** | React 18, TypeScript, Vite, Vanilla CSS + Glassmorphism | Live real-time dashboard, interactive agent marketplace, wallet management, agent passport, and AgentGuard intervention modals. |
 
 ---
 
-## 2. Verified Getting Started Sequence
+## 2. Development Setup Sequence
 
 Follow these steps to boot the entire AgentPay ecosystem cleanly from scratch:
 
@@ -121,3 +121,7 @@ PYTHONPATH=. pytest backend/tests/test_integration.py -v
 PYTHONPATH=. python scripts/run_clean_demo_flow.py
 ```
 *Results and live on-chain Monad testnet tx hashes will be saved into `docs/DEMO_LOG.md`.*
+
+## Validation scope
+
+Use the [contract guide](../contracts/README.md) for actual Foundry commands and the [frontend guide](../frontend/README.md) for the dashboard. The deterministic policy suite is [test_policy_safety.py](../backend/tests/test_policy_safety.py); it is distinct from provider-backed integration tests and testnet settlement. Model latency, accuracy and transaction success need their own recorded evaluation.
