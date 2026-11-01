@@ -80,3 +80,27 @@ def test_trusted_demo_name_cannot_override_low_reputation(client):
 def test_service_without_registered_agent_is_not_trusted(client):
     client.get_service.return_value = {"name": "FlightFinder"}
     assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
+
+
+@pytest.mark.parametrize("field", ["per_tx_limit", "daily_limit", "approval_threshold"])
+def test_missing_policy_field_blocks(client, field):
+    del client.get_limits.return_value[field]
+    assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
+
+
+@pytest.mark.parametrize("field", ["per_tx_limit", "daily_limit", "approval_threshold"])
+@pytest.mark.parametrize("value", [float("inf"), -1.0, True])
+def test_invalid_policy_values_block(client, field, value):
+    client.get_limits.return_value[field] = value
+    assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
+
+
+@pytest.mark.parametrize("spent", [-1.0, float("nan"), float("inf"), True])
+def test_invalid_spending_total_blocks(client, spent):
+    client.get_spent_today.return_value = spent
+    assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
+
+
+def test_explicit_zero_budget_limits_remain_unlimited(client):
+    client.get_limits.return_value.update(per_tx_limit=0, daily_limit=0)
+    assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "ALLOW"

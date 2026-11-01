@@ -113,9 +113,13 @@ class AgentGuard:
         try:
             limits = self.chain.get_limits(agent_id)
             spent_today = self.chain.get_spent_today(agent_id)
-            per_tx_limit = limits.get("per_tx_limit", 0.5)
-            daily_limit = limits.get("daily_limit", 1.0)
-            approval_threshold = limits.get("approval_threshold", 0.2)
+            per_tx_limit = limits["per_tx_limit"]
+            daily_limit = limits["daily_limit"]
+            approval_threshold = limits["approval_threshold"]
+            for value in (per_tx_limit, daily_limit, approval_threshold, spent_today):
+                if (isinstance(value, bool) or not isinstance(value, (int, float))
+                        or not math.isfinite(value) or value < 0):
+                    raise ValueError("Policy limits and spending must be finite nonnegative numbers")
 
             # Check 3: Within transaction limit
             if per_tx_limit == 0.0 or amount_eth <= per_tx_limit:
