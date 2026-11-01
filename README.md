@@ -163,3 +163,11 @@ Unknown recipients and absent, malformed, or out-of-range reputation scores fail
 A service display name cannot override its registered reputation. Explicit demo aliases
 remain prototype conveniences, not production identity verification. Tests mock the chain
 and never send payments.
+
+### Required spending-policy data
+
+AgentGuard requires all three chain policy fields (`per_tx_limit`, `daily_limit`,
+`approval_threshold`) and a finite nonnegative spending total. Missing fields,
+negative values, nonfinite numbers, and booleans block payment rather than using
+local defaults. Explicit zero transaction/daily limits retain their existing
+unlimited meaning. Run the policy suite documented above to verify this behavior.
