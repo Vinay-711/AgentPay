@@ -121,6 +121,25 @@ PYTHONPATH=. python backend/seed.py
 PYTHONPATH=. python scripts/run_clean_demo_flow.py
 ```
 
+## Offline policy verification
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-policy-test.txt
+python -m pytest backend/tests/test_policy_safety.py -q
+```
+
+These tests inject a mock chain client and cover invalid amounts, failed chain lookups,
+recipient reputation, transaction limits and daily budgets. No private key, RPC calls,
+LLM credentials or transaction submission is required. GitHub Actions runs this suite
+on pull requests and pushes to `main`. A recipient verification outage blocks a request;
+invalid or non-positive amounts are rejected before chain access.
+
+This is a hackathon prototype, not an audited payment system. The offline suite does
+not validate smart-contract safety, live settlement or the ML layer. Other trust and
+fallback paths need further review before handling real funds. Use testnet funds only.
+
 ## License
 
 MIT

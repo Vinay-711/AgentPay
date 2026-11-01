@@ -1,6 +1,7 @@
 """AgentGuard Policy Engine — On-chain & off-chain rule evaluation augmented with ML."""
 
 import logging
+import math
 from typing import Any, Dict, List, Optional
 
 from backend.chain import chain_client
@@ -46,6 +47,13 @@ class AgentGuard:
         5. Service matches requested task
         + ML Risk Assessment (when in borderline/medium risk zone)
         """
+        if not math.isfinite(amount_eth) or amount_eth <= 0:
+            return RiskResult(
+                decision="BLOCK",
+                reasons=["Payment amount must be finite and greater than zero."],
+                checks=[RiskCheck(label="Valid payment amount", passed=False)],
+            )
+
         checks: List[RiskCheck] = []
         fail_reasons: List[str] = []
 
@@ -88,8 +96,10 @@ class AgentGuard:
                 checks.append(RiskCheck(label="Recipient trusted", passed=False, detail=f"Low reputation: {rep_score}/100 (<40)"))
                 fail_reasons.append(f"✕ Recipient trusted: Recipient reputation ({rep_score}/100) is below safety threshold of 40")
         except Exception as e:
-            checks.append(RiskCheck(label="Recipient trusted", passed=True, detail="Default trust applied"))
-            recipient_trusted = True
+            logger.warning("Recipient verification unavailable: %s", type(e).__name__)
+            checks.append(RiskCheck(label="Recipient trusted", passed=False,
+                                    detail="Recipient verification unavailable"))
+            fail_reasons.append("Recipient trust could not be verified; retry after the lookup recovers.")
 
         # ── Check 3 & 4: Transaction & Daily Limits ───────────────────────────
         within_tx_limit = False
