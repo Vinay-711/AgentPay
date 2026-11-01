@@ -154,3 +154,12 @@ MIT
 | Payment-policy regression coverage | [Policy safety tests](backend/tests/test_policy_safety.py) |
 
 Treat ML latency claims in design material as evaluation targets unless accompanied by a reproducible benchmark. Live provider calls, testnet transactions and model training are separate from local deterministic policy checks.
+
+### Recipient-trust regression checks
+
+`python -m pip install -r requirements-policy-test.txt` followed by
+`python -m pytest backend/tests/test_policy_safety.py -q` runs the isolated policy suite.
+Unknown recipients and absent, malformed, or out-of-range reputation scores fail closed.
+A service display name cannot override its registered reputation. Explicit demo aliases
+remain prototype conveniences, not production identity verification. Tests mock the chain
+and never send payments.

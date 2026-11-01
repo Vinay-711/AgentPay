@@ -56,3 +56,27 @@ def test_exceeded_transaction_limit_blocks(client):
 def test_exceeded_daily_budget_blocks(client):
     client.get_spent_today.return_value = 0.95
     assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
+
+
+def test_unknown_recipient_without_service_is_not_trusted(client):
+    result = AgentGuard(client).evaluate(1, 0.1, "unverified-recipient")
+    assert result.decision == "BLOCK"
+    assert any(c.label == "Recipient trusted" and not c.passed for c in result.checks)
+
+
+@pytest.mark.parametrize("reputation", [{}, {"score": None}, {"score": float("nan")},
+    {"score": float("inf")}, {"score": 101}, {"score": -1}, {"score": True}])
+def test_missing_or_invalid_reputation_is_not_trusted(client, reputation):
+    client.get_reputation.return_value = reputation
+    assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
+
+
+def test_trusted_demo_name_cannot_override_low_reputation(client):
+    client.get_service.return_value = {"agent_id": 2, "name": "FlightFinder"}
+    client.get_reputation.return_value = {"score": 10}
+    assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
+
+
+def test_service_without_registered_agent_is_not_trusted(client):
+    client.get_service.return_value = {"name": "FlightFinder"}
+    assert AgentGuard(client).evaluate(1, 0.1, "recipient", service_id=3).decision == "BLOCK"
